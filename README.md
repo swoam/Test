@@ -1,6 +1,6 @@
-# Bájalo
+# Bájalo · Swoam
 
-App de Android para descargar videos, audio y fotos de TikTok, YouTube, Instagram, X, Facebook y [más de mil sitios](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). Pegas enlaces, eliges la calidad y se guardan en el teléfono.
+**Bájalo** es parte del ecosistema **Swoam**. Es una app de Android para descargar videos, audio y fotos de TikTok, YouTube, Instagram, X, Facebook y [más de mil sitios](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). Pegas enlaces, eliges la calidad y se guardan en el teléfono.
 
 ## Funciones
 
@@ -13,6 +13,7 @@ App de Android para descargar videos, audio y fotos de TikTok, YouTube, Instagra
 - **Lista limpia**: lo que termina desaparece de la cola; los errores se quedan con un mensaje y el botón *Reintentar*.
 - **Mis descargas**: abrir, compartir o borrar lo descargado.
 - **Actualizar motor**: actualiza yt-dlp dentro de la app cuando un sitio deja de funcionar.
+- **Se actualiza sola desde Swoam**: cada 12 horas mira los Releases de GitHub de su repositorio. Si hay una versión nueva, te la ofrece, la descarga y abre el instalador sin salir de la app. También puedes buscarla con *Buscar actualización de la app*.
 - **Registro** persistente (*Ver registro*; mantén presionado para borrarlo).
 - Tema claro, oscuro o del sistema.
 
@@ -34,8 +35,23 @@ app/src/main/java/com/swoam/bajalo/
 ├── LoginActivity.kt     Inicio de sesión en navegador interno
 ├── Saver.kt             Guardado en Descargas / carpeta elegida + historial
 ├── DownloadsActivity.kt "Mis descargas"
+├── Updater.kt           Autoactualización desde los Releases de Swoam
 └── Service.kt           Application, notificaciones y servicio en primer plano
 ```
+
+## Repositorio en Swoam
+
+La app busca sus actualizaciones en `swoam/bajalo` (`UPDATE_REPO` en `app/build.gradle.kts`). Cuando se compila con GitHub Actions, usa automáticamente el repositorio desde el que se compila.
+
+Para moverla a su propio repositorio:
+
+1. Crea en GitHub el repositorio **`swoam/bajalo`** (vacío, sin README).
+2. Sube este código:
+   ```bash
+   git remote add bajalo https://github.com/swoam/bajalo.git
+   git push bajalo HEAD:main
+   ```
+3. Configura la llave de firma (ver abajo) y publica la primera versión con `git tag v1.0 && git push bajalo v1.0`.
 
 ## Conseguir el APK
 
@@ -76,6 +92,8 @@ Android solo deja instalar una versión nueva encima de la anterior si ambas est
 - Si un sitio deja de funcionar, toca **Actualizar motor**: las plataformas cambian a menudo y yt-dlp se actualiza igual de seguido.
 
 ## Aviso
+
+Bájalo es un proyecto de Swoam.
 
 Descarga solo contenido sobre el que tengas derecho, y respeta los términos de cada plataforma.
 

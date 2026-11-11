@@ -16,6 +16,10 @@ android {
         versionCode = (System.getenv("VERSION_CODE") ?: "1").toInt()
         versionName = System.getenv("VERSION_NAME") ?: "1.0"
         ndk { abiFilters += listOf("arm64-v8a") }
+
+        // Repositorio de Swoam del que la app descarga sus actualizaciones
+        val updateRepo = System.getenv("UPDATE_REPO") ?: "swoam/bajalo"
+        buildConfigField("String", "UPDATE_REPO", "\"$updateRepo\"")
     }
 
     signingConfigs {

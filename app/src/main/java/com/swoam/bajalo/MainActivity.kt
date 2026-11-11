@@ -119,8 +119,9 @@ class MainActivity : AppCompatActivity() {
             snack("Se vuelve a guardar en Descargas › ${Saver.BASE}")
             true
         }
+        b.btnAppUpdate.setOnClickListener { checkAppUpdate(manual = true) }
         b.versionText.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(RELEASES_URL)))
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(Updater.releasesPage)))
         }
 
         lifecycleScope.launch {
@@ -131,7 +132,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         askPermissions()
-        if (savedInstanceState == null) handleShare(intent)
+        if (savedInstanceState == null) {
+            handleShare(intent)
+            if (Updater.shouldAutoCheck(this)) checkAppUpdate(manual = false)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -238,7 +242,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun refreshVersion() {
-        b.versionText.text = "${getString(R.string.app_name)} ${BuildConfig.VERSION_NAME} · motor yt-dlp ${Engine.engineVersion ?: "cargando…"}"
+        b.versionText.text = "${getString(R.string.app_name)} ${BuildConfig.VERSION_NAME} · motor yt-dlp ${Engine.engineVersion ?: "cargando…"}\n" +
+            "Parte del ecosistema ${getString(R.string.brand)}"
     }
 
     private fun cycleTheme() {
@@ -269,6 +274,64 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** Busca una versión nueva en los Releases de Swoam y ofrece instalarla. */
+    private fun checkAppUpdate(manual: Boolean) {
+        if (manual) {
+            b.btnAppUpdate.isEnabled = false
+            b.btnAppUpdate.text = "Buscando…"
+        }
+        lifecycleScope.launch {
+            val result = runCatching { Updater.check(this@MainActivity) }
+            if (manual) {
+                b.btnAppUpdate.isEnabled = true
+                b.btnAppUpdate.text = "Buscar actualización de la app"
+            }
+            result.onFailure {
+                AppLog.log(this@MainActivity, "No se pudo buscar actualización: ${it.message}")
+                if (manual) snack("No se pudo buscar actualización: ${it.message}")
+            }
+            val release = result.getOrNull()
+            when {
+                result.isFailure -> Unit
+                release == null -> if (manual) snack("Tienes la última versión (${BuildConfig.VERSION_NAME})")
+                !manual && Updater.isSkipped(this@MainActivity, release.version) -> Unit
+                else -> offerUpdate(release)
+            }
+        }
+    }
+
+    private fun offerUpdate(r: Updater.Release) {
+        val size = if (r.size > 0) " (%.0f MB)".format(r.size / 1_048_576.0) else ""
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Nueva versión ${r.version}$size")
+            .setMessage(r.notes.ifBlank { "Hay una versión nueva de ${getString(R.string.app_name)}." }.take(1500))
+            .setPositiveButton("Actualizar") { _, _ -> downloadUpdate(r) }
+            .setNegativeButton("Ahora no", null)
+            .setNeutralButton("Saltar esta") { _, _ -> Updater.skip(this, r.version) }
+            .show()
+    }
+
+    private fun downloadUpdate(r: Updater.Release) {
+        b.btnAppUpdate.isEnabled = false
+        lifecycleScope.launch {
+            try {
+                val apk = Updater.download(this@MainActivity, r) { p ->
+                    b.btnAppUpdate.text = "Descargando actualización… $p %"
+                }
+                AppLog.log(this@MainActivity, "Actualización ${r.version} descargada")
+                if (!Updater.install(this@MainActivity, apk)) {
+                    snack("Permite instalar apps desde ${getString(R.string.app_name)} y vuelve a tocar Actualizar")
+                }
+            } catch (e: Exception) {
+                AppLog.log(this@MainActivity, "Error al descargar la actualización: ${e.message}")
+                snack("No se pudo descargar la actualización: ${e.message}")
+            } finally {
+                b.btnAppUpdate.isEnabled = true
+                b.btnAppUpdate.text = "Buscar actualización de la app"
+            }
+        }
+    }
+
     private fun showLog() {
         val text = AppLog.read(this).ifBlank { "El registro está vacío." }
         MaterialAlertDialogBuilder(this)
@@ -296,10 +359,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun snack(msg: String) = Snackbar.make(b.root, msg, Snackbar.LENGTH_LONG).show()
-
-    companion object {
-        const val RELEASES_URL = "https://github.com/swoam/Test/releases/latest"
-    }
 }
 
 /** Lista de enlaces pendientes. */

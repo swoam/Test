@@ -37,6 +37,16 @@ class LogicTest {
     }
 
     @Test
+    fun versionComparison() {
+        assertEquals(true, Updater.isNewer("1.1", "1.0"))
+        assertEquals(true, Updater.isNewer("1.10", "1.9"))
+        assertEquals(false, Updater.isNewer("1.0", "1.0"))
+        assertEquals(false, Updater.isNewer("1.0", "1.0.1"))
+        assertEquals(true, Updater.isNewer("1.0", "0.12-dev"))
+        assertEquals(true, Updater.isNewer("1.0", "1.0-dev"))
+    }
+
+    @Test
     fun durations() {
         assertEquals("0:59", formatDuration(59))
         assertEquals("3:05", formatDuration(185))
