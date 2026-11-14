@@ -1,0 +1,10 @@
+<resources>
+    <color name="primary">#B4430F</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="primary_container">#FFDBCC</color>
+    <color name="on_primary_container">#3A0B00</color>
+    <color name="secondary_container">#F6DED4</color>
+    <color name="on_secondary_container">#2C160D</color>
+    <color name="surface_tint">#B4430F</color>
+    <color name="ic_bg">#E85D24</color>
+</resources>
