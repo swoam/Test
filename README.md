@@ -1,5 +1,7 @@
 # Bájalo · Swoam
 
+> **Proyecto trasladado (2026-11-14).** Este prototipo continúa como **Swoam Video Netdown** (SWM016 provisional) en el repositorio privado `swoam/Swoam-DownloaderApk`, rehecho con el Swoam Design System y el Swoam Update Framework. Esta rama se conserva solo como referencia: no se desarrolla ni se publica desde aquí.
+
 **Bájalo** es parte del ecosistema **Swoam**. Es una app de Android para descargar videos, audio y fotos de TikTok, YouTube, Instagram, X, Facebook y [más de mil sitios](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). Pegas enlaces, eliges la calidad y se guardan en el teléfono.
 
 ## Funciones
